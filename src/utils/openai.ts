@@ -19,7 +19,8 @@ const httpsPost = async (
 	headers: Record<string, string>,
 	json: unknown,
 	timeout: number,
-	proxy?: string
+	proxy?: string,
+	onData?: (chunk: Buffer) => void
 ) =>
 	new Promise<{
 		request: ClientRequest;
@@ -51,6 +52,10 @@ const httpsPost = async (
 						data: Buffer.concat(body).toString(),
 					});
 				});
+
+				if (onData) {
+					response.on('data', onData);
+				}
 			}
 		);
 		request.on('error', reject);
@@ -71,13 +76,61 @@ const createChatCompletion = async (
 	apiKey: string,
 	json: CreateChatCompletionRequest,
 	timeout: number,
-	proxy?: string
+	proxy?: string,
+	onStream?: (chunk: string) => void
 ) => {
+	if (json.stream && onStream) {
+		const { response } = await httpsPost(
+			'api.siliconflow.cn',
+			'/v1/chat/completions',
+			{
+				Authorization: `Bearer ${apiKey}`,
+			},
+			json,
+			timeout,
+			proxy,
+			(chunk) => {
+				const lines = chunk
+					.toString()
+					.split('\n')
+					.filter((line) => line.trim() !== '');
+
+				for (const line of lines) {
+					if (line.includes('[DONE]')) return;
+					if (!line.startsWith('data: ')) continue;
+
+					try {
+						const data = JSON.parse(line.slice(6));
+						onStream(data.choices[0].delta.reasoning_content || data.choices[0].delta.content);
+					} catch (err) {
+						console.error('Error parsing stream:', err);
+					}
+				}
+			}
+		);
+
+		if (
+			!response.statusCode ||
+			response.statusCode < 200 ||
+			response.statusCode > 299
+		) {
+			let errorMessage = `OpenAI API Error: ${response.statusCode} - ${response.statusMessage}`;
+
+			if (response.statusCode === 500) {
+				errorMessage += '\n\nCheck the API status: https://status.openai.com';
+			}
+
+			throw new KnownError(errorMessage);
+		}
+
+		return {} as CreateChatCompletionResponse;
+	}
+
 	const { response, data } = await httpsPost(
-		'api.siliconflow.com',
+		'api.siliconflow.cn',
 		'/v1/chat/completions',
 		{
-			Authorization: `Bearer sk-bhtlzducjvcqabhgfrvtinesjhqlcybeuzkxokigagbpisru`,
+			Authorization: `Bearer ${apiKey}`,
 		},
 		json,
 		timeout,
@@ -139,7 +192,8 @@ export const generateCommitMessage = async (
 	maxLength: number,
 	type: CommitType,
 	timeout: number,
-	proxy?: string
+	proxy?: string,
+	onStream?: (chunk: string) => void
 ) => {
 	try {
 		const completion = await createChatCompletion(
@@ -156,17 +210,22 @@ export const generateCommitMessage = async (
 						content: diff,
 					},
 				],
-				temperature: 0.7,
+				temperature: 0.6,
 				top_p: 1,
 				frequency_penalty: 0,
 				presence_penalty: 0,
 				max_tokens: 200,
-				stream: false,
+				stream: Boolean(onStream),
 				n: completions,
 			},
 			timeout,
-			proxy
+			proxy,
+			onStream
 		);
+
+		if (onStream) {
+			return [];
+		}
 
 		return deduplicateMessages(
 			completion.choices

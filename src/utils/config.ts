@@ -52,7 +52,7 @@ const configParsers = {
 	},
 	type(type?: string) {
 		if (!type) {
-			return '';
+			return 'conventional';
 		}
 
 		parseAssert(
@@ -74,14 +74,14 @@ const configParsers = {
 	},
 	model(model?: string) {
 		if (!model || model.length === 0) {
-			return 'Pro/deepseek-ai/DeepSeek-V3';
+			return 'Pro/deepseek-ai/DeepSeek-R1';
 		}
 
 		return model as TiktokenModel;
 	},
 	timeout(timeout?: string) {
 		if (!timeout) {
-			return 10_000;
+			return 100_000;
 		}
 
 		parseAssert('timeout', /^\d+$/.test(timeout), 'Must be an integer');
