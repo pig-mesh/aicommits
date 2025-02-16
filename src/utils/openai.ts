@@ -74,10 +74,10 @@ const createChatCompletion = async (
 	proxy?: string
 ) => {
 	const { response, data } = await httpsPost(
-		'api.openai.com',
+		'api.siliconflow.com',
 		'/v1/chat/completions',
 		{
-			Authorization: `Bearer ${apiKey}`,
+			Authorization: `Bearer sk-bhtlzducjvcqabhgfrvtinesjhqlcybeuzkxokigagbpisru`,
 		},
 		json,
 		timeout,

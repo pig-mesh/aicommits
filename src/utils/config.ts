@@ -22,14 +22,6 @@ const parseAssert = (name: string, condition: any, message: string) => {
 
 const configParsers = {
 	OPENAI_KEY(key?: string) {
-		if (!key) {
-			throw new KnownError(
-				'Please set your OpenAI API key via `aicommits config set OPENAI_KEY=<your token>`'
-			);
-		}
-		parseAssert('OPENAI_KEY', key.startsWith('sk-'), 'Must start with "sk-"');
-		// Key can range from 43~51 characters. There's no spec to assert this.
-
 		return key;
 	},
 	locale(locale?: string) {
@@ -82,7 +74,7 @@ const configParsers = {
 	},
 	model(model?: string) {
 		if (!model || model.length === 0) {
-			return 'gpt-3.5-turbo';
+			return 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B';
 		}
 
 		return model as TiktokenModel;
