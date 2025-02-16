@@ -54,7 +54,8 @@ export default async (
 
 		const { env } = process;
 		const config = await getConfig({
-			OPENAI_KEY: env.DEEPSEEK_KEY || env.OPENAI_API_KEY,
+			OPENAI_KEY: env.AI_COMMIT_KEY,
+			model: env.AI_COMMIT_MODEL || 'deepseek-chat',
 			proxy:
 				env.https_proxy || env.HTTPS_PROXY || env.http_proxy || env.HTTP_PROXY,
 			generate: generate?.toString(),

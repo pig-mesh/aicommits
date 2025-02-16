@@ -80,8 +80,9 @@ const createChatCompletion = async (
 	onStream?: (chunk: string) => void
 ) => {
 	if (json.stream && onStream) {
+		const { env } = process;
 		const { response } = await httpsPost(
-			'api.siliconflow.cn',
+			env.AI_COMMIT_HOST || 'api.deepseek.com',
 			'/v1/chat/completions',
 			{
 				Authorization: `Bearer ${apiKey}`,
@@ -126,8 +127,9 @@ const createChatCompletion = async (
 		return {} as CreateChatCompletionResponse;
 	}
 
+	const { env } = process;
 	const { response, data } = await httpsPost(
-		'api.siliconflow.cn',
+		env.AI_COMMIT_HOST || 'api.deepseek.com',
 		'/v1/chat/completions',
 		{
 			Authorization: `Bearer ${apiKey}`,
