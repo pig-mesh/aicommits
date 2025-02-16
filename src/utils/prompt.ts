@@ -44,10 +44,10 @@ export const generatePrompt = (
 	type: CommitType
 ) =>
 	[
-		'Generate a concise git commit message written in present tense for the following code diff with the given specifications below:',
-		`Message language: ${locale}`,
-		`Commit message must be a maximum of ${maxLength} characters.`,
-		'Exclude anything unnecessary such as translation. Your entire response will be passed directly into git commit.',
+		`生成一个简洁的git提交消息，用现在时的形式写在下面的代码diff中，按照下面给出的规范：
+“信息语言：中文”，
+‘提交消息必须是${maxLength}字符的最大值。’，
+排除任何不必要的东西，比如翻译。您的整个响应将直接传递到git commit。`,
 		commitTypes[type],
 		specifyCommitFormat(type),
 	]

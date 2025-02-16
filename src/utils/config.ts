@@ -74,7 +74,7 @@ const configParsers = {
 	},
 	model(model?: string) {
 		if (!model || model.length === 0) {
-			return 'deepseek-ai/DeepSeek-R1-Distill-Llama-8B';
+			return 'Pro/deepseek-ai/DeepSeek-V3';
 		}
 
 		return model as TiktokenModel;
